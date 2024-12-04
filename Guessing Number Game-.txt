@@ -1,0 +1,180 @@
+Guessing Number Game:-
+
+Program:(C-Sharp)
+
+
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Collections.Generic;
+
+class Program
+{
+    // List to store player results
+    static List<PlayerResult> playerResults = new List<PlayerResult>();
+    static string _computerNumber;
+
+    static void Main(string[] args)
+    {
+        string playerName;
+        Stopwatch stopwatch = new Stopwatch();
+
+        Console.WriteLine("Welcome to the Guessing Number Game!");
+
+        // Prompt user to enter their name
+        Console.Write("Enter your name: ");
+        playerName = Console.ReadLine();
+
+        // Start the timer
+        stopwatch.Start();
+
+        // Generate the computer's number (4 digits with no duplicates)
+        _computerNumber = GenerateRandomNumber();
+
+        int numberOfGuesses = 0;
+        bool correctGuess = false;
+
+        while (!correctGuess)
+        {
+            numberOfGuesses++;
+            Console.WriteLine("\nEnter your 4-digit guess: ");
+            string userGuess = Console.ReadLine();
+
+            if (userGuess.Length != 4 || !userGuess.All(char.IsDigit))
+            {
+                Console.WriteLine("Invalid input! Please enter exactly 4 digits.");
+                continue;
+            }
+
+            string feedback = ProvideFeedback(userGuess);
+            Console.WriteLine("Feedback: " + feedback);
+
+            if (feedback == "++++") // All digits correct
+            {
+                correctGuess = true;
+                stopwatch.Stop();
+                Console.WriteLine($"Congratulations {playerName}! You guessed the number in {numberOfGuesses} guesses and {stopwatch.Elapsed.TotalSeconds:F2} seconds.");
+                
+                // Save result and display the best score
+                SaveResult(playerName, numberOfGuesses, (int)stopwatch.Elapsed.TotalSeconds);
+                DisplayBestScore();
+            }
+        }
+    }
+
+    // Generate a random 4-digit number with no repeated digits
+    static string GenerateRandomNumber()
+    {
+        Random random = new Random();
+        string result;
+        do
+        {
+            result = random.Next(1000, 10000).ToString(); // Random 4-digit number
+        } while (result.Distinct().Count() != 4); // Ensure all digits are unique
+        return result;
+    }
+
+    // Provide feedback for the guess
+    private static string ProvideFeedback(string guess)
+    {
+        char[] feedback = new char[4];
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (guess[i] == _computerNumber[i])
+            {
+                feedback[i] = '+';
+            }
+            else if (_computerNumber.Contains(guess[i]))
+            {
+                feedback[i] = '-';
+            }
+            else
+            {
+                feedback[i] = ' ';
+            }
+        }
+
+        return new string(feedback);
+    }
+
+    // Save the result to the playerResults list
+    static void SaveResult(string playerName, int guesses, int timeTaken)
+    {
+        double score = CalculateScore(guesses, timeTaken);
+        playerResults.Add(new PlayerResult
+        {
+            PlayerName = playerName,
+            Guesses = guesses,
+            TimeTaken = timeTaken,
+            Score = score
+        });
+    }
+
+    // Calculate score based on guesses and time taken
+    static double CalculateScore(int guesses, int timeTaken)
+    {
+        // The score is a weighted combination of the number of guesses and the time taken
+        return guesses + (timeTaken / 60.0); // example: time in minutes
+    }
+
+    // Display the best score (lowest score) from the playerResults list
+    static void DisplayBestScore()
+    {
+        if (playerResults.Count == 0)
+        {
+            Console.WriteLine("No results to display.");
+            return;
+        }
+
+        var bestScore = playerResults.OrderBy(r => r.Score).First();
+
+        Console.WriteLine("\nBest Score:");
+        Console.WriteLine($"Player: {bestScore.PlayerName}");
+        Console.WriteLine($"Guesses: {bestScore.Guesses}");
+        Console.WriteLine($"Time Taken: {bestScore.TimeTaken} seconds");
+        Console.WriteLine($"Score: {bestScore.Score:F2}");
+    }
+}
+
+public class PlayerResult
+{
+    public string PlayerName { get; set; }
+    public int Guesses { get; set; }
+    public int TimeTaken { get; set; }
+    public double Score { get; set; }
+}
+
+
+
+
+OUTPUT:-
+
+Welcome to the Guessing Number Game!
+Enter your name: Sathasivam
+
+Enter your 4-digit guess: 
+1234
+Feedback:  -  
+
+Enter your 4-digit guess: 
+2567
+Feedback: - - 
+
+Enter your 4-digit guess: 
+6892
+Feedback: --++
+
+Enter your 4-digit guess: 
+8692
+Feedback: ++++
+Congratulations Sathasivam! You guessed the number in 4 guesses and 65.16 seconds.
+
+Best Score:
+Player: Sathasivam
+Guesses: 4
+Time Taken: 65 seconds
+Score: 5.08
+
+=== Code Execution Successful ===
+=== Session Ended. Please Run the code again ===
